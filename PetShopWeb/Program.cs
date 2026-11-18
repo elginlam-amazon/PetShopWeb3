@@ -14,7 +14,8 @@ builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
-string connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+string connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"]
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<PetShopContext>(options => options.UseLazyLoadingProxies().UseSqlServer(connectionString));
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
@@ -26,27 +27,29 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<PetShopContext>();
-    ctx.Database.EnsureDeleted();
+    if (app.Environment.IsDevelopment())
+        ctx.Database.EnsureDeleted();
     ctx.Database.EnsureCreated();
 
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
     var adminRole = new IdentityRole("admin");
-    if(!ctx.Roles.Any())
+    if (!ctx.Roles.Any())
         roleManager.CreateAsync(adminRole).GetAwaiter().GetResult();
 
-    if(!ctx.Users.Any(u => u.UserName == "Admin"))
+    if (!ctx.Users.Any(u => u.UserName == "admin@admin.com"))
     {
         var adminUser = new IdentityUser()
         {
             UserName = "admin@admin.com",
             Email = "admin@admin.com"
         };
-        var result = userManager.CreateAsync(adminUser, "Admin123").GetAwaiter().GetResult();
-        userManager.AddToRoleAsync(adminUser, adminRole.Name).GetAwaiter().GetResult();
+        userManager.CreateAsync(adminUser, "Admin123").GetAwaiter().GetResult();
+        userManager.AddToRoleAsync(adminUser, adminRole.Name!).GetAwaiter().GetResult();
     }
 }
+
 
 if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error/ErrorPage");
@@ -59,8 +62,7 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllerRoute("default", "{controller=Home}/{action=HomePage}/{id?}");
-});
+app.MapControllerRoute("default", "{controller=Home}/{action=HomePage}/{id?}");
 app.Run();
+
+public partial class Program { }
