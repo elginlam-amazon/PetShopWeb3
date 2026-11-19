@@ -1,5 +1,5 @@
 # PetShop ASP.NET Core web application
-<h3>ASP.NET Core 6 MVC web app using MSSQL, bootstrap, EF Core, identity and docker</h3>
+<h3>ASP.NET Core 10 MVC web app using MSSQL, bootstrap, EF Core, identity and docker</h3>
 
 <p align="center">
   <img width="600"  src="https://user-images.githubusercontent.com/110489710/209929509-3ed325ce-c8b4-40f4-a2f7-a2f7ad0ff727.png">
