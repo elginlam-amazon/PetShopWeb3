@@ -19,7 +19,7 @@ namespace PetShopWeb.Attributes
         }
         public override bool IsValid(object? value)
         {
-            string path;
+            string? path;
             if (value is IFormFile file)
                 path = file.FileName;
             else
@@ -28,7 +28,7 @@ namespace PetShopWeb.Attributes
             if (path is not null)
             {
                 int dotIndex = path.LastIndexOf('.');
-                string pathExtension = path[(dotIndex + 1)..].ToLower();
+                string pathExtension = path[(dotIndex + 1)..].ToLowerInvariant();
                 if (extensions.Contains(pathExtension))
                     return true;
             }
